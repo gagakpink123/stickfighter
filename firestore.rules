@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 32 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidRoom(data) {
+      return data.keys().hasAll(['id', 'name', 'status', 'hostClientId', 'createdAt']) &&
+        data.keys().hasOnly(['id', 'name', 'status', 'hostClientId', 'guestClientId', 'createdAt']) &&
+        data.id is string && data.id.size() >= 4 && data.id.size() <= 10 &&
+        data.name is string && data.name.size() >= 2 && data.name.size() <= 28 &&
+        data.status is string && (data.status == 'waiting' || data.status == 'playing') &&
+        data.hostClientId is string && data.hostClientId.size() >= 1 && data.hostClientId.size() <= 64 &&
+        (!('guestClientId' in data) || data.guestClientId == null || (data.guestClientId is string && data.guestClientId.size() <= 64)) &&
+        data.createdAt is number;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow create: if isValidId(roomId) && isValidRoom(request.resource.data);
+      allow update: if isValidId(roomId) && isValidRoom(request.resource.data) &&
+        (
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guestClientId', 'status']) &&
+           resource.data.status == 'waiting' &&
+           request.resource.data.status == 'playing' &&
+           request.resource.data.hostClientId == resource.data.hostClientId) ||
+          (request.resource.data.hostClientId == resource.data.hostClientId &&
+           request.resource.data.name == resource.data.name)
+        );
+      allow delete: if isValidId(roomId);
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Room",
+      "description": "Multiplayer match room for Online 1v1 matchmaking",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 10,
+          "pattern": "^[a-zA-Z0-9\\-_]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 28
+        },
+        "status": {
+          "type": "string",
+          "enum": ["waiting", "playing"]
+        },
+        "hostClientId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "guestClientId": {
+          "type": ["string", "null"],
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "number"
+        }
+      },
+      "required": ["id", "name", "status", "hostClientId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/rooms/{roomId}": {
+      "schema": "Room",
+      "description": "Active multiplayer rooms list for matchmaking"
+    }
+  }
+}

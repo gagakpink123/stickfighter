@@ -1,0 +1,11 @@
+{
+  "projectId": "adnan-family-fighter",
+  "appId": "1:765629646550:web:01e2392055053bacff6b77",
+  "apiKey": "AIzaSyDIIK8ncPleTJNAN5_A6pudA_jEiuDzQP0",
+  "authDomain": "adnan-family-fighter.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "adnan-family-fighter.firebasestorage.app",
+  "messagingSenderId": "765629646550",
+  "measurementId": "G-8QQMDDXM0J",
+  "databaseURL": "https://adnan-family-fighter-default-rtdb.asia-southeast1.firebasedatabase.app"
+}

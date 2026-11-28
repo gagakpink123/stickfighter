@@ -1,0 +1,79 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null && auth.token.email == 'adnanjogja@gmail.com'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.email == 'adnanjogja@gmail.com')",
+        ".write": "auth != null && auth.uid == $uid && !newData.exists()",
+        "email": {
+          ".write": "auth != null && auth.uid == $uid && !data.exists()",
+          ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 120"
+        },
+        "createdAt": {
+          ".write": "auth != null && auth.uid == $uid && !data.exists()",
+          ".validate": "newData.isNumber()"
+        },
+        "lastSeen": {
+          ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'adnanjogja@gmail.com')",
+          ".validate": "newData.isNumber()"
+        },
+        "displayName": {
+          ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'adnanjogja@gmail.com')",
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 24"
+        },
+        "isBlocked": {
+          ".write": "auth != null && (auth.token.email == 'adnanjogja@gmail.com' || (auth.uid == $uid && !data.exists() && newData.val() == false))",
+          ".validate": "newData.isBoolean()"
+        },
+        "customCharacters": {
+          "$charKey": {
+            ".write": "auth != null && ($charKey == 'adnan' || $charKey == 'tika' || $charKey == 'dhira' || $charKey == 'iyen') && (auth.token.email == 'adnanjogja@gmail.com' || (auth.uid == $uid && root.child('users').child($uid).child('isBlocked').val() != true))",
+            ".validate": "!newData.exists() || (newData.hasChildren(['name', 'updatedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 22 && newData.child('updatedAt').isNumber() && (!newData.child('faceBase64').exists() || (newData.child('faceBase64').isString() && newData.child('faceBase64').val().length <= 36000)))"
+          }
+        },
+        "matchHistory1v1": {
+          ".read": "auth != null && (auth.uid == $uid || auth.token.email == 'adnanjogja@gmail.com')",
+          "$matchId": {
+            ".write": "auth != null && auth.uid == $uid && !data.exists() && root.child('users').child($uid).child('isBlocked').val() != true",
+            ".validate": "$matchId.matches(/^[A-Za-z0-9_-]{4,64}$/) && newData.hasChildren(['matchId', 'roomName', 'playedAt', 'durationMs', 'result', 'opponentName']) && newData.child('matchId').val() == $matchId && newData.child('roomName').isString() && newData.child('roomName').val().length >= 1 && newData.child('roomName').val().length <= 32 && newData.child('playedAt').isNumber() && newData.child('durationMs').isNumber() && (newData.child('result').val() == 'win' || newData.child('result').val() == 'loss') && newData.child('opponentName').isString() && newData.child('opponentName').val().length >= 1 && newData.child('opponentName').val().length <= 32"
+          }
+        }
+      }
+    },
+    "leaderboard1v1": {
+      ".read": true,
+      "$entryId": {
+        ".write": "(auth != null && $entryId == auth.uid && (root.child('users').child($entryId).child('isBlocked').val() != true || !newData.exists())) || ($entryId.matches(/^guest_[A-Za-z0-9_-]{4,72}$/) && !data.exists())",
+        ".validate": "newData.hasChildren(['key', 'isGuest', 'name', 'wins', 'losses', 'matches', 'updatedAt']) && newData.child('key').val() == $entryId && newData.child('isGuest').isBoolean() && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 32 && newData.child('wins').isNumber() && newData.child('wins').val() >= 0 && newData.child('losses').isNumber() && newData.child('losses').val() >= 0 && newData.child('matches').isNumber() && newData.child('matches').val() >= 1 && (!newData.child('isGuest').val() || (newData.child('matches').val() == 1 && (newData.child('wins').val() + newData.child('losses').val()) == 1))"
+      }
+    },
+    "rooms": {
+      ".read": true,
+      "$roomId": {
+        ".write": "($roomId.matches(/^[0-9]{4,8}$/) && (newData.exists() || !data.exists() || (data.child('lastActive').isNumber() && data.child('lastActive').val() < now - 604800000) || (auth != null && (auth.token.email == 'adnanjogja@gmail.com' || (data.child('creatorUid').isString() && data.child('creatorUid').val() == auth.uid)))))",
+        ".validate": "newData.hasChildren(['id', 'name', 'status', 'lastActive']) && newData.child('id').isString() && newData.child('id').val() == $roomId && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 28 && (newData.child('status').val() == 'waiting' || newData.child('status').val() == 'playing' || newData.child('status').val() == 'offline') && newData.child('lastActive').isNumber()",
+        "creatorUid": {
+          ".write": "!data.exists() || (auth != null && (auth.token.email == 'adnanjogja@gmail.com' || data.val() == auth.uid))",
+          ".validate": "!newData.exists() || (newData.isString() && auth != null && newData.val() == auth.uid)"
+        },
+        "creatorName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 32)"
+        },
+        "hostProfile": {
+          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 22 && (!newData.child('faceBase64').exists() || (newData.child('faceBase64').isString() && newData.child('faceBase64').val().length <= 36000)))"
+        },
+        "guestProfile": {
+          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 22 && (!newData.child('faceBase64').exists() || (newData.child('faceBase64').isString() && newData.child('faceBase64').val().length <= 36000)))"
+        },
+        "messages": {
+          "$msgId": {
+            ".write": "newData.exists()",
+            ".validate": "newData.hasChildren(['senderName', 'text', 'createdAt']) && newData.child('senderName').isString() && newData.child('senderName').val().length >= 1 && newData.child('senderName').val().length <= 30 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 140 && newData.child('createdAt').isNumber()"
+          }
+        }
+      }
+    }
+  }
+}

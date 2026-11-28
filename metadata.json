@@ -1,0 +1,6 @@
+{
+  "name": "Adnan Family Fighter",
+  "description": "Game pertarungan 2.5D Three.js bergaya 3D Ugly Doodle & Sketsa Tangan dengan aksen merah, 4 karakter keluarga, dan senjata rahasia unik.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
